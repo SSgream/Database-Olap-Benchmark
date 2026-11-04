@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse_skripsi
+    ports:
+      - "8124:8123"
+      - "9001:9000"
+    ulimits: 
+      nofile: 
+        soft: 262144 
+        hard: 262144 
+    deploy: 
+      resources: 
+        limits: 
+          cpus: '4.0' 
+          memory: 5G 
+        reservations: 
+          cpus: '2.0' 
+          memory: 2.5G
+    volumes:
+      - clickhouse_skripsi_data:/var/lib/clickhouse
+      - ./data:/source:ro
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    container_name: postgres_skripsi
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: skripsi_db
+    ports:
+      - "5434:5432"
+    shm_size: '1.5gb' 
+    deploy: 
+      resources: 
+        limits: 
+          cpus: '4.0' 
+          memory: 5G 
+        reservations: 
+          cpus: '2.0' 
+          memory: 2.5G
+    volumes:
+      - postgres_skripsi_data:/var/lib/postgresql/data
+      - ./data:/source:ro
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb_skripsi
+    ports:
+      - "27018:27017"
+    command: ["mongod", "--wiredTigerCacheSizeGB", "2.0"] 
+    deploy: 
+      resources: 
+        limits: 
+          cpus: '4.0' 
+          memory: 5G 
+        reservations: 
+          cpus: '2.0' 
+          memory: 2.5G
+    volumes:
+      - mongo_skripsi_data:/data/db
+      - ./data:/source:ro
+    restart: unless-stopped
+
+volumes:
+  clickhouse_skripsi_data:
+  postgres_skripsi_data:
+  mongo_skripsi_data:
